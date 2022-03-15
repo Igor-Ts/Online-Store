@@ -56,7 +56,14 @@ class DeviceController {
     }
 
     async getOne(req, res) {
-        
+        const {id} = req.params
+        const device = await Device.findOne(
+            {
+                where:{id},
+                include: [{model: DeviceInfo, as: 'info'}] //upload info
+            },
+        )
+        return res.json(device)
     }
 }
 
