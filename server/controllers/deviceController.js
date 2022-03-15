@@ -23,7 +23,24 @@ class DeviceController {
     }
 
     async getAll(req, res) {
-
+        let {brandId, typeId, limit, page} = req.query //input query
+        page = page || 1  //number page or default value
+        limit = limit || 9
+        let offset = page * limit - limit // logic for pagination
+        let devices;
+        if (!brandId && !typeId) {
+            devices = await Device.findAndCountAll({limit, offset}) 
+        }
+        if (brandId && !typeId) {
+            devices = await Device.findAndCountAll({where: {brandId}, limit, offset})
+        }
+        if (!brandId && typeId) {
+            devices = await Device.findAndCountAll({where: {typeId}, limit, offset})
+        }
+        if (brandId && typeId) {
+            devices = await Device.findAndCountAll({where: {brandId, typeId}, limit, offset})
+        }
+        return res.json(devices)
     }
 
     async getOne(req, res) {
