@@ -1,16 +1,30 @@
-import React, {useContext, useState} from "react"
+import {observer} from "mobx-react-lite"
+import React, {useContext, useEffect, useState} from "react"
 import {Button, Col, Dropdown, Form, Modal, Row} from "react-bootstrap"
+import {fetchBrands, fetchTypes} from "../../http/deviceAPI"
 import {Context} from "../../index"
 
-const CreateDevice = ({show, onHide}) => {
+const CreateDevice = observer(({show, onHide}) => {
 	const {device} = useContext(Context)
+	const {name, setName} = useState("")
+	const {file, setFile} = useState(null)
+	const {price, setPrice} = useState(0)
 	const [info, setInfo] = useState([])
+
+	useEffect(() => {
+		fetchTypes().then((data) => device.setTypes(data))
+		fetchBrands().then((data) => device.setBrands(data))
+	}, [])
 
 	const addInfo = () => {
 		setInfo([...info, {title: "", description: "", number: Date.now()}])
 	}
 	const removeInfo = (number) => {
 		setInfo(info.filter((i) => i.number !== number))
+	}
+
+	const selectFile = (e) => {
+		setFile(e.target.files[0])
 	}
 
 	return (
@@ -23,33 +37,50 @@ const CreateDevice = ({show, onHide}) => {
 			<Modal.Body>
 				<Form>
 					<Dropdown className="mt-2 mb-2">
-						<Dropdown.Toggle>Choice type</Dropdown.Toggle>
+						<Dropdown.Toggle>
+							{device.selectedType.name || "Choice type"}
+						</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{device.types.map((type) => (
-								<Dropdown.Item key={type.id}>
+								<Dropdown.Item
+									onClick={() => device.setSelectedType(type)}
+									key={type.id}>
 									{type.name}
 								</Dropdown.Item>
 							))}
 						</Dropdown.Menu>
 					</Dropdown>
 					<Dropdown className="mt-2 mb-2">
-						<Dropdown.Toggle>Choice brand</Dropdown.Toggle>
+						<Dropdown.Toggle>
+							{device.selectedBrand.name || "Choice brand"}
+						</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{device.brands.map((brand) => (
-								<Dropdown.Item key={brand.id}>
+								<Dropdown.Item
+									onClick={() =>
+										device.setSelectedBrand(brand)
+									}
+									key={brand.id}>
 									{brand.name}
 								</Dropdown.Item>
 							))}
 						</Dropdown.Menu>
 					</Dropdown>
 					<Form.Control
+						value={name}
+						onChange={(e) => setName(e.target.value)}
 						className="mt-3"
 						placeholder="Write device name"></Form.Control>
 					<Form.Control
+						value={price}
+						onChange={(e) => setPrice(Number(e.target.value))}
 						className="mt-3"
 						placeholder="Write device price"
 						type="number"></Form.Control>
-					<Form.Control className="mt-3" type="file"></Form.Control>
+					<Form.Control
+						className="mt-3"
+						type="file"
+						onChange={selectFile}></Form.Control>
 					<hr />
 					<Button variant="outline-dark" onClick={addInfo}>
 						Add new specification
@@ -83,6 +114,6 @@ const CreateDevice = ({show, onHide}) => {
 			</Modal.Footer>
 		</Modal>
 	)
-}
+})
 
 export default CreateDevice
