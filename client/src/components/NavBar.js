@@ -16,8 +16,9 @@ const NavBar = observer(() => {
 	const logOut = () => {
 		user.setUser({})
 		user.setIsAuth(false)
+		localStorage.removeItem("token")
 	}
-	console.log(user)
+
 	return (
 		<Navbar bg="dark" variant="dark">
 			<Container>

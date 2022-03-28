@@ -1,14 +1,14 @@
 import {observer} from "mobx-react-lite"
 import React, {useContext, useEffect, useState} from "react"
 import {Button, Col, Dropdown, Form, Modal, Row} from "react-bootstrap"
-import {fetchBrands, fetchTypes} from "../../http/deviceAPI"
+import {createDevice, fetchBrands, fetchTypes} from "../../http/deviceAPI"
 import {Context} from "../../index"
 
 const CreateDevice = observer(({show, onHide}) => {
 	const {device} = useContext(Context)
-	const {name, setName} = useState("")
-	const {file, setFile} = useState(null)
-	const {price, setPrice} = useState(0)
+	const [name, setName] = useState("")
+	const [file, setFile] = useState(null)
+	const [price, setPrice] = useState(0)
 	const [info, setInfo] = useState([])
 
 	useEffect(() => {
@@ -23,8 +23,25 @@ const CreateDevice = observer(({show, onHide}) => {
 		setInfo(info.filter((i) => i.number !== number))
 	}
 
+	const changeInfo = (key, value, number) => {
+		setInfo(
+			info.map((i) => (i.number === number ? {...i, [key]: value} : i))
+		)
+	}
+
 	const selectFile = (e) => {
 		setFile(e.target.files[0])
+	}
+
+	const addDevice = () => {
+		const formData = new FormData()
+		formData.append("name", name)
+		formData.append("price", `${price}`)
+		formData.append("img", file)
+		formData.append("brandId", device.selectedBrand.id)
+		formData.append("typeId", device.selectedType.id)
+		formData.append("info", JSON.stringify(info))
+		createDevice(formData).then((data) => onHide())
 	}
 
 	return (
@@ -88,10 +105,30 @@ const CreateDevice = observer(({show, onHide}) => {
 					{info.map((i) => (
 						<Row className="mt-4" key={i.number}>
 							<Col md={4}>
-								<Form.Control placeholder="Write name of specification" />
+								<Form.Control
+									value={i.title}
+									onChange={(e) =>
+										changeInfo(
+											"title",
+											e.target.value,
+											i.number
+										)
+									}
+									placeholder="Write name of specification"
+								/>
 							</Col>
 							<Col md={4}>
-								<Form.Control placeholder="Write description of specification" />
+								<Form.Control
+									value={i.description}
+									onChange={(e) =>
+										changeInfo(
+											"description",
+											e.target.value,
+											i.number
+										)
+									}
+									placeholder="Write description of specification"
+								/>
 							</Col>
 							<Col md={4}>
 								<Button
@@ -108,7 +145,7 @@ const CreateDevice = observer(({show, onHide}) => {
 				<Button variant="outline-danger" onClick={onHide}>
 					Close
 				</Button>
-				<Button variant="outline-success" onClick={onHide}>
+				<Button variant="outline-success" onClick={addDevice}>
 					Add
 				</Button>
 			</Modal.Footer>
