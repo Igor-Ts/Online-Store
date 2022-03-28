@@ -6,6 +6,7 @@ import AppRouter from "./components/AppRouter"
 import NavBar from "./components/NavBar"
 import {check} from "./http/userAPI"
 import {Spinner} from "react-bootstrap"
+import Pages from "./components/Pages"
 
 const App = observer(() => {
 	const {user} = useContext(Context)
@@ -27,6 +28,7 @@ const App = observer(() => {
 		<BrowserRouter>
 			<NavBar />
 			<AppRouter />
+			<Pages />
 		</BrowserRouter>
 	)
 })
